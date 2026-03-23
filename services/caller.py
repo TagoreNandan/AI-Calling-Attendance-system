@@ -9,10 +9,24 @@ def trigger_call(to):
 
     url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_SID}/Calls.json"
 
+    twiml = """
+<Response>
+    <Play>https://untakable-dylan-jazziest.ngrok-free.dev/question-audio</Play>
+
+    <Record
+        timeout="6"
+        maxLength="30"
+        playBeep="true"
+        transcribe="true"
+        transcribeCallback="https://untakable-dylan-jazziest.ngrok-free.dev/transcript"
+    />
+</Response>
+"""
+
     data = {
         "To": to,
         "From": TWILIO_FROM,
-        "Url": "http://demo.twilio.com/docs/voice.xml"
+        "Twiml": twiml
     }
 
     response = requests.post(
