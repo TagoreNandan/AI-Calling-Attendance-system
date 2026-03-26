@@ -15,10 +15,9 @@ def trigger_call(to):
 
     <Record
         timeout="6"
-        maxLength="30"
+        maxLength="60"
         playBeep="true"
-        transcribe="true"
-        transcribeCallback="https://untakable-dylan-jazziest.ngrok-free.dev/transcript"
+        recordingStatusCallback="https://untakable-dylan-jazziest.ngrok-free.dev/recording"
     />
 </Response>
 """
