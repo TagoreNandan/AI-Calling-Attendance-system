@@ -6,19 +6,22 @@ from services.caller import trigger_call
 import requests
 import os
 from faster_whisper import WhisperModel
+from difflib import get_close_matches
+from services.sheets import update_reason
 
 app = FastAPI()
 model = WhisperModel("base", compute_type="int8")
+call_map = {}
 
 
 # ---------- INTENT DETECTION ----------
 def detect_reason(text):
 
-    text = text.lower()
+    text = text.lower().split()
 
     sick_words = [
         "sick","fever","ill","hospital","doctor",
-        "not well","health","cold","cough","vomit"
+        "health","cold","cough","vomit"
     ]
 
     travel_words = [
@@ -31,20 +34,31 @@ def detect_reason(text):
         "festival","pooja"
     ]
 
-    for w in sick_words:
-        if w in text:
+    # flatten text words for fuzzy matching
+    for word in text:
+
+        # check sick
+        if word in sick_words:
             return "SICK"
 
-    for w in travel_words:
-        if w in text:
+        if get_close_matches(word, sick_words, cutoff=0.6):
+            return "SICK"
+
+        # check travel
+        if word in travel_words:
             return "TRAVEL"
 
-    for w in function_words:
-        if w in text:
+        if get_close_matches(word, travel_words, cutoff=0.6):
+            return "TRAVEL"
+
+        # check function
+        if word in function_words:
+            return "FUNCTION"
+
+        if get_close_matches(word, function_words, cutoff=0.6):
             return "FUNCTION"
 
     return "OTHER"
-
 
 # ---------- ROUTES ----------
 
@@ -66,8 +80,10 @@ def call_parent(roll: str):
     if not phone:
         return {"error": "Roll not found"}
 
-    response = trigger_call(phone)
-
+    response = trigger_call(phone, roll)
+    call_sid = response.get("sid")
+    call_map[call_sid] = roll
+    print("🧠 MAPPING:", call_sid, "->", roll)
     return {
         "roll": roll,
         "phone": phone,
@@ -81,6 +97,8 @@ def call_parent(roll: str):
 async def recording(request: Request):
 
     form = await request.form()
+    call_sid = form.get("CallSid")
+    roll = request.query_params.get("roll")
 
     recording_url = form.get("RecordingUrl")
 
@@ -108,5 +126,31 @@ async def recording(request: Request):
 
     with open("transcripts.txt", "a") as f:
         f.write(f"{reason} :: {text}\n")
+    update_reason(roll, reason, text)
+
+    print("📌 CALL SID:", call_sid)
+    print("📌 ROLL FOUND:", roll)
 
     return {"status": "done"}
+
+
+
+@app.api_route("/twiml", methods=["GET", "POST"])
+def twiml(request: Request):
+
+    roll = request.query_params.get("roll")
+
+    xml = f"""
+<Response>
+    <Play>https://untakable-dylan-jazziest.ngrok-free.dev/question-audio</Play>
+
+    <Record
+        timeout="6"
+        maxLength="60"
+        playBeep="true"
+        recordingStatusCallback="https://untakable-dylan-jazziest.ngrok-free.dev/recording?roll={roll}"
+    />
+</Response>
+"""
+
+    return Response(content=xml, media_type="application/xml")
