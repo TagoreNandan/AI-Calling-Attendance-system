@@ -46,3 +46,15 @@ def update_reason(roll, reason, transcript):
             return True
 
     return False
+
+
+def create_daily_sheet(name):
+
+    sh = client.open("attendance_calls")  # MUST EXIST ALREADY
+
+    try:
+        return sh.worksheet(name)
+    except Exception:
+        ws = sh.add_worksheet(title=name, rows="1000", cols="10")
+        ws.append_row(["roll", "reason", "transcript"])
+        return ws

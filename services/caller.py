@@ -5,7 +5,7 @@ TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 TWILIO_FROM = os.getenv("TWILIO_FROM")
 
-def trigger_call(to, roll):
+def trigger_call(to, roll, subject, section):
 
     url = f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_SID}/Calls.json"
 
