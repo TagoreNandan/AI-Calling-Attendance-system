@@ -7,29 +7,31 @@
 </head>
 <body>
 
-<div class="card">
-    <h2>📞 AI Attendance</h2>
+<div class="container">
+    <div class="card">
 
-    <label>Subject</label>
-    <select id="subject">
-        <option value="AIML">AIML</option>
-        <option value="DS">DS</option>
-    </select>
+        <h2>📞 AI Attendance</h2>
 
-    <label>Section</label>
-    <select id="section">
-        <option value="A">A</option>
-        <option value="B">B</option>
-    </select>
+        <label>Subject</label>
+        <select id="subject">
+            <option value="AIML">AIML</option>
+            <option value="DS">DS</option>
+        </select>
 
-    <label>Roll Numbers</label>
-    <textarea id="rolls"></textarea>
+        <label>Section</label>
+        <select id="section">
+            <option value="A">A</option>
+            <option value="B">B</option>
+        </select>
 
-    <button onclick="startCalls()">Start Calls</button>
+        <label>Roll Numbers</label>
+        <textarea id="rolls" placeholder="Enter roll numbers separated by comma"></textarea>
 
-    <div id="status"></div>
+        <button onclick="startCalls()">Start Calls</button>
+
+        <p id="status"></p>
+
+    </div>
 </div>
-
-<script src="script.js"></script>
 </body>
 </html>
